@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <forward_list>
-#include <tuple>
+#include <utility>
 #include <chrono>
 
 namespace qb {
@@ -12,12 +12,19 @@ namespace qb {
 
 	class HashTable {
 	public:
+		HashTable() {
+			table_ = std::vector<std::forward_list<std::pair<int, std::string>>>(HASHSIZE);
+		}
 		bool insert(int key, std::string value) {
-			if (get(key) == "") { // Duplicate handling: ignore if exists
-				std::pair<int, std::string> myPair(key, value);
-				int hashedKey = hash_(key);
-				it_ = table_[hashedKey].before_begin();
-				table_[hashedKey].emplace_after(it_, myPair);
+			try {
+				if (get(key) == "") { // If identical key exists, do not overwrite
+					std::pair<int, std::string> myPair(key, value);
+					int hashedKey = hash_(key);
+					it_ = table_[hashedKey].before_begin();
+					table_[hashedKey].emplace_after(it_, myPair);
+				}				
+			} catch(const std::exception & e) {
+				return false;
 			}
 			return true;
 		}
@@ -36,7 +43,7 @@ namespace qb {
 			}
 		}
 	private:
-		std::vector<std::forward_list<std::pair<int, std::string>>> table_ = std::vector<std::forward_list<std::pair<int, std::string>>>(HASHSIZE);
+		std::vector<std::forward_list<std::pair<int, std::string>>> table_;
 		std::forward_list<std::pair<int, std::string>>::iterator it_;
 
 		// Hashing function
@@ -48,10 +55,6 @@ namespace qb {
 
 int main() {
 	qb::HashTable h;
-
-	std::cout << "Keith Miklas" << std::endl;
-	std::cout << "732-233-7457" << std::endl;
-	std::cout << "Hash table exercise - 12 Apr 2017" << std::endl << std::endl;
 
 	std::cout << "Buckets: " << qb::HASHSIZE << std::endl << std::endl;
 
@@ -78,62 +81,9 @@ int main() {
 	std::cout << "Get 10225: " << h.get(10225) << std::endl;
 	std::cout << std::endl;
 
-	// Timed
-	std::wcout << "TIMED" << std::endl << std::endl;
-	std::chrono::high_resolution_clock::time_point begin, end;
-	std::chrono::duration<double> d;
-
-	// Timed insertion
-	begin = std::chrono::high_resolution_clock::now();
-	h.insert(1024, "kappa");
-	end = std::chrono::high_resolution_clock::now();
-	d = std::chrono::duration_cast<std::chrono::duration<double>> (end - begin) * 1000000000;
-	std::cout << d.count() << "ns\t\t{1024, \"xi\"} key:value pair inserted." << std::endl;
-
-	// Timed retrieval
-	begin = std::chrono::high_resolution_clock::now();
-	std::string s = h.get(1024);
-	end = std::chrono::high_resolution_clock::now();
-	d = std::chrono::duration_cast<std::chrono::duration<double>> (end - begin) * 1000000000;
-	std::cout << d.count() << "ns\t\tKey 947 retrieved." << std::endl;
-
 	std::cout << std::endl;
 	std::cout << "Enter 'e' and press Enter to end: ";
 	std::cin.get();
 	std::cout << "\n\n";
 	return 0;
 }
-
-
-// *******************************
-// OUTPUT
-// *******************************
-//
-// Buckets: 7
-
-// INSERTION
-
-// BUCKET 0 : [32767, delta] -->[0, gamma] -->[42, beta] --> NULL
-// BUCKET 1: [1, theta] -->[29, epsilon] --> NULL
-// BUCKET 2: [947, lambda] --> NULL
-// BUCKET 3: NULL
-// BUCKET 4 : [74, heta] -->[123, zeta] --> NULL
-// BUCKET 5: [10225, mu] -->[33, kappa] --> NULL
-// BUCKET 6: NULL
-
-// RETRIEVAL
-
-// Get 29 : epsilon
-// Get 34 :
-// Get 10225 : mu
-
-// TIMED
-
-// 1793ns        { 1024, "xi" } key:value pair inserted.
-// 256ns         Key 947 retrieved.
-
-// Enter 'e' and press Enter to end:
-//
-
-
-
