@@ -95,7 +95,7 @@ int main() {
 
 	// Timed insertion
 	begin = std::chrono::high_resolution_clock::now();
-	h.insert(1024, "kappa");
+	h.insert(1024, "xi");
 	end = std::chrono::high_resolution_clock::now();
 	d = std::chrono::duration_cast<std::chrono::duration<double>> (end - begin) * 1000000000;
 	std::cout << d.count() << "ns\t\t{1024, \"xi\"} key:value pair inserted." << std::endl;
@@ -105,7 +105,12 @@ int main() {
 	std::string s = h.get(1024);
 	end = std::chrono::high_resolution_clock::now();
 	d = std::chrono::duration_cast<std::chrono::duration<double>> (end - begin) * 1000000000;
-	std::cout << d.count() << "ns\t\tKey 1024 retrieved, value: " << s << std::endl;
+	std::cout << d.count() << "ns\t\tKey 1024 retrieved, value: " << s << std::endl << std::endl;
+
+	// End state
+	std::cout << "END STATE" << std::endl << std::endl;
+
+	h.print();
 
 	std::cout << std::endl;
 	std::cout << "Enter 'e' and press Enter to end: ";
